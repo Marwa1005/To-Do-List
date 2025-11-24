@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo List Enchantée</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Cinzel', 'Georgia', serif;
+            background: linear-gradient(135deg, #0c0c2e 0%, #1a1a4a 50%, #2d1b69 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Étoiles en arrière-plan */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-image: 
+                radial-gradient(2px 2px at 20px 30px, #fff, transparent),
+                radial-gradient(2px 2px at 40px 70px, #fff, transparent),
+                radial-gradient(1px 1px at 90px 40px, #fff, transparent),
+                radial-gradient(1px 1px at 130px 80px, #fff, transparent),
+                radial-gradient(2px 2px at 160px 30px, #fff, transparent),
+                radial-gradient(1px 1px at 210px 60px, #fff, transparent),
+                radial-gradient(2px 2px at 250px 20px, #fff, transparent),
+                radial-gradient(1px 1px at 290px 90px, #fff, transparent),
+                radial-gradient(2px 2px at 320px 50px, #fff, transparent);
+            background-repeat: repeat;
+            background-size: 350px 350px;
+            animation: twinkle 8s ease-in-out infinite alternate;
+            z-index: 0;
+        }
+
+        @keyframes twinkle { 0%,100%{opacity:0.3;}50%{opacity:0.8;} }
+
+        .magic-grimoire {
+            background: linear-gradient(135deg, #2d1b69 0%, #1a1a4a 100%);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5), inset 0 0 0 2px #8a4fff, inset 0 0 0 4px #4a1e8c;
+            width: 100%; max-width: 600px; overflow: hidden; position: relative; z-index:1;
+            border: 3px solid #ffd700;
+        }
+
+        .grimoire-cover {
+            background: linear-gradient(135deg, #8a4fff 0%, #6a2cc9 100%);
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .magic-title {
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: #ffd700;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(255,215,0,0.5),2px 2px 0 #8a4fff,4px 4px 0 #4a1e8c;
+            animation: glow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { text-shadow:0 0 10px rgba(255,215,0,0.5),2px 2px 0 #8a4fff,4px 4px 0 #4a1e8c; }
+            to { text-shadow:0 0 20px rgba(255,215,0,0.8),2px 2px 0 #8a4fff,4px 4px 0 #4a1e8c,0 0 30px rgba(255,215,0,0.6);}
+        }
+
+        .spell-input-area {
+            background: rgba(26,26,74,0.8);
+            padding: 25px; margin: 20px; border-radius:15px; border:2px solid #ffd700;
+            box-shadow: inset 0 0 20px rgba(138,79,255,0.3),0 0 20px rgba(255,215,0,0.2);
+            position: relative; overflow: hidden;
+        }
+
+        .input-group { display:flex; gap:15px; align-items:center; }
+        #spellInput {
+            flex:1; padding:18px 20px; border:2px solid #8a4fff; border-radius:12px;
+            font-size:1.2rem; font-family:'Cinzel', serif; outline:none; background:rgba(42,21,94,0.8);
+            color:#ffd700; box-shadow: inset 0 0 10px rgba(138,79,255,0.3); transition: all 0.3s ease;
+        }
+        #spellInput::placeholder { color:#a78bfa; }
+        #spellInput:focus { border-color:#ffd700; box-shadow: inset 0 0 15px rgba(255,215,0,0.3),0 0 15px rgba(255,215,0,0.4); }
+
+        #castSpellBtn {
+            background: linear-gradient(135deg,#ffd700 0%,#ffed4e 100%);
+            color:#4a1e8c; border:none; padding:18px 30px; border-radius:12px; cursor:pointer;
+            font-size:1.2rem;font-weight:700;font-family:'Cinzel', serif;
+            display:flex; align-items:center; gap:10px;
+            box-shadow:0 5px 15px rgba(255,215,0,0.4),0 0 10px rgba(255,215,0,0.6);
+            position:relative; overflow:hidden; transition: all 0.3s ease;
+        }
+        #castSpellBtn:hover { transform: translateY(-3px) scale(1.05); box-shadow:0 8px 25px rgba(255,215,0,0.6),0 0 20px rgba(255,215,0,0.8); }
+        #castSpellBtn::before {
+            content: ''; position:absolute; top:0; left:-100%; width:100%; height:100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: left 0.5s ease;
+        }
+        #castSpellBtn:hover::before { left:100%; }
+
+        .magic-filters { display:flex; justify-content:center; gap:15px; margin:20px; flex-wrap:wrap; }
+        .magic-filter {
+            background: rgba(42,21,94,0.6); border:2px solid #8a4fff; padding:12px 25px; border-radius:25px;
+            cursor:pointer; font-size:1.1rem;font-family:'Cinzel',serif;font-weight:600; display:flex;align-items:center; gap:8px;
+            color:#d4b8ff; box-shadow:0 0 10px rgba(138,79,255,0.3); transition: all 0.3s ease;
+        }
+        .magic-filter.active { background:#8a4fff; color:#ffd700; border-color:#ffd700; transform:scale(1.05); box-shadow:0 0 15px rgba(138,79,255,0.6);}
+        .magic-filter:hover { transform:translateY(-2px); box-shadow:0 0 15px rgba(138,79,255,0.5); }
+
+        .spells-container { max-height:400px; overflow-y:auto; padding:10px 20px; margin:20px; }
+        .spell-item {
+            display:flex; align-items:center; padding:20px; background: rgba(42,21,94,0.6);
+            border-radius:15px; margin-bottom:15px; box-shadow: 0 5px 15px rgba(0,0,0,0.3), inset 0 0 0 2px #8a4fff;
+            transition:all 0.3s ease; position:relative; border:1px solid transparent; background-clip:padding-box;
+        }
+        .spell-item.completed { opacity:0.7; background: rgba(26,26,74,0.8); }
+        .spell-item.completed .spell-text { text-decoration: line-through; color:#a78bfa; }
+        .spell-checkbox { margin-right:20px; width:22px;height:22px; cursor:pointer; accent-color:#ffd700; transform:scale(1.2); filter: drop-shadow(0 0 5px rgba(255,215,0,0.5)); }
+        .spell-content { flex:1; position:relative; }
+        .spell-text { font-size:1.3rem; color:#ffd700; margin-bottom:8px; font-weight:600; text-shadow:0 0 5px rgba(255,215,0,0.3); }
+        .spell-meta { display:flex; gap:15px; font-size:0.9rem; color:#d4b8ff; }
+        .spell-type { background: rgba(138,79,255,0.3); padding:4px 12px; border-radius:15px; font-size:0.8rem; border:1px solid #8a4fff; }
+        .spell-time { display:flex; align-items:center; gap:5px; }
+        .spell-actions { display:flex; gap:10px; margin-left:15px; }
+        .spell-action { background:none; border:none; cursor:pointer; padding:10px; border-radius:8px; transition:all 0.3s ease; color:#d4b8ff; font-size:1.1rem; }
+        .spell-edit:hover { color:#ffd700; background:rgba(255,215,0,0.1); transform:rotate(15deg); }
+        .spell-delete:hover { color:#ff6b6b; background:rgba(255,107,107,0.1); transform:rotate(-15deg); }
+
+        .empty-grimoire { text-align:center; padding:60px 20px; color:#a78bfa; }
+        .empty-grimoire i { font-size:4rem; margin-bottom:20px; color:#ffd700; opacity:0.7; animation: float 3s ease-in-out infinite; }
+        @keyframes float { 0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);} }
+        .empty-title { font-size:1.8rem; margin-bottom:15px; color:#ffd700; text-shadow:0 0 10px rgba(255,215,0,0.3); }
+        .empty-subtitle { font-size:1.1rem; opacity:0.8; }
+
+        .magic-footer { padding:20px; background: rgba(26,26,74,0.8); border-top:2px solid #8a4fff; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px; }
+        #clearCompleted {
+            background: linear-gradient(135deg,#ff6b6b 0%,#ff8e8e 100%); color:white; border:none; padding:12px 25px; border-radius:10px;
+            cursor:pointer; font-size:1.1rem;font-family:'Cinzel',serif;font-weight:600; display:flex;align-items:center;gap:8px; box-shadow:0 5px 15px rgba(255,107,107,0.4);
+        }
+        #clearCompleted:hover { transform:translateY(-2px); box-shadow:0 8px 20px rgba(255,107,107,0.6); }
+
+        .wizard-quote { font-style:italic;color:#d4b8ff;text-align:center;flex:1;font-size:1rem;text-shadow:0 0 5px rgba(212,184,255,0.3); }
+
+        @media (max-width:768px){
+            .magic-title{font-size:2.2rem;}
+            .input-group{flex-direction:column;}
+            #castSpellBtn{justify-content:center;width:100%;}
+            .magic-footer{flex-direction:column;text-align:center;}
+            .spell-item{flex-direction:column;align-items:flex-start;gap:15px;}
+            .spell-actions{align-self:flex-end;}
+        }
+
+        .spells-container::-webkit-scrollbar{width:10px;}
+        .spells-container::-webkit-scrollbar-track{background:rgba(42,21,94,0.6);border-radius:5px;}
+        .spells-container::-webkit-scrollbar-thumb{background:linear-gradient(135deg,#ffd700,#8a4fff);border-radius:5px;border:2px solid #4a1e8c;}
+        .spells-container::-webkit-scrollbar-thumb:hover{background:linear-gradient(135deg,#ffed4e,#9d6aff);}
+    </style>
+</head>
+<body>
+    <div class="magic-grimoire">
+        <div class="grimoire-cover">
+            <h1 class="magic-title">📜 To do List Enchantée</h1>
+            <p class="magic-subtitle">Listez vos tâches magiques ici</p>
+        </div>
+
+        <div class="spell-input-area">
+            <div class="input-group">
+                <input type="text" id="spellInput" placeholder="Écrivez votre tâche..." maxlength="100">
+                <button id="castSpellBtn"><i class="fas fa-magic"></i> Ajouter</button>
+            </div>
+        </div>
+
+        <div class="magic-filters">
+            <button class="magic-filter active" data-filter="all"><i class="fas fa-scroll"></i> Toutes</button>
+        </div>
+
+        <div class="spells-container" id="spellsList">
+            <div class="empty-grimoire">
+                <i class="fas fa-hat-wizard"></i>
+                <h3 class="empty-title">Grimoire Vide</h3>
+                <p class="empty-subtitle">Commencez à ajouter vos tâches !</p>
+            </div>
+        </div>
+
+        <div class="magic-footer">
+           
+            <div class="wizard-quote" id="wizardQuote">"La magie est partout, pour ceux qui savent regarder." - Merlin</div>
+        </div>
+    </div>
+
+    <script>
+        const spellInput = document.getElementById('spellInput');
+        const castSpellBtn = document.getElementById('castSpellBtn');
+        const spellsList = document.getElementById('spellsList');
+        const clearCompletedBtn = document.getElementById('clearCompleted');
+        const wizardQuoteEl = document.getElementById('wizardQuote');
+        let spells = JSON.parse(localStorage.getItem('magicSpells')) || [];
+
+        const wizardQuotes = [
+            "La magie est partout, pour ceux qui savent regarder. - Merlin",
+            "Croire est la clé de toute magie. - Peter Pan",
+            "La plus grande magie est de transformer les rêves en réalité. - Proverbe de sorcier"
+        ];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderSpells();
+            setRandomQuote();
+        });
+
+        function setRandomQuote(){
+            wizardQuoteEl.textContent = wizardQuotes[Math.floor(Math.random()*wizardQuotes.length)];
+        }
+
+        castSpellBtn.addEventListener('click', addSpell);
+        spellInput.addEventListener('keypress', e => { if(e.key==='Enter'){addSpell();} });
+
+        function addSpell(){
+            const text = spellInput.value.trim();
+            if(text===''){ alert("Veuillez écrire une tâche !"); return; }
+            const spell={id:Date.now(),text,completed:false};
+            spells.unshift(spell);
+            saveSpells(); renderSpells();
+            spellInput.value='';
+        }
+
+        function toggleSpell(id){
+            spells = spells.map(s => s.id===id ? {...s,completed:!s.completed}:s);
+            saveSpells(); renderSpells();
+        }
+
+        function deleteSpell(id){
+            if(confirm("Supprimer cette tâche ?")){
+                spells = spells.filter(s=>s.id!==id);
+                saveSpells(); renderSpells();
+            }
+        }
+
+        function editSpellPrompt(id){
+            const spell = spells.find(s=>s.id===id);
+            const newText = prompt("Modifier la tâche:",spell.text);
+            if(newText!==null && newText.trim()!==''){
+                spells = spells.map(s=>s.id===id ? {...s,text:newText.trim()}:s);
+                saveSpells(); renderSpells();
+            }
+        }
+
+        clearCompletedBtn.addEventListener('click', ()=>{
+            if(confirm("Supprimer toutes les tâches terminées ?")){
+                spells = spells.filter(s=>!s.completed);
+                saveSpells(); renderSpells();
+            }
+        });
+
+        function renderSpells(){
+            if(spells.length===0){
+                spellsList.innerHTML=`<div class="empty-grimoire"><i class="fas fa-hat-wizard"></i>
+                    <h3 class="empty-title">Grimoire Vide</h3><p class="empty-subtitle">Commencez à ajouter vos tâches !</p></div>`;
+                return;
+            }
+            spellsList.innerHTML = spells.map(spell=>`
+                <div class="spell-item ${spell.completed?'completed':''}">
+                    <input type="checkbox" class="spell-checkbox" ${spell.completed?'checked':''} onchange="toggleSpell(${spell.id})">
+                    <div class="spell-content">
+                        <div class="spell-text">${spell.text}</div>
+                    </div>
+                    <div class="spell-actions">
+                        <button class="spell-action spell-edit" onclick="editSpellPrompt(${spell.id})"><i class="fas fa-edit"></i></button>
+                        <button class="spell-action spell-delete" onclick="deleteSpell(${spell.id})"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function saveSpells(){ localStorage.setItem('magicSpells',JSON.stringify(spells)); }
+    </script>
+</body>
+</html>
